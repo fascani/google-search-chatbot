@@ -11,17 +11,25 @@ import os
 from serpapi import GoogleSearch
 from bs4 import BeautifulSoup
 import requests
-import openai
 from google.oauth2 import service_account
-
-# Tokens
-serp_api_token = 'xxxx'
-openai_api_token = 'xxxx'
+import gspread
 
 # 1. Collect the results from a google search
 #############################################
-def collect_links(google_search):
+def collect_links(google_search, serp_api_token):
   '''
+  Collect links from a google search
+
+  Parameters
+  ----------
+  google_search : str
+      Google search string
+  serp_api_token : str
+      API token for SerpApi. See https://serpapi.com/
+
+  Returns
+  -------
+      List of URLs (str).
   '''
   
   params = {
@@ -39,6 +47,16 @@ def collect_links(google_search):
 #################################################################
 def parse_return_texts(results):
   '''
+  Return all pieces of visible texts from the list of urls returned by the google search.
+
+  Parameters
+  ----------
+  results : List of str
+    List of urls.
+
+  Returns
+  -------
+      List of visible texts separated.
   '''
   texts = []
   
@@ -55,7 +73,7 @@ def parse_return_texts(results):
 
 # 3. We save the result into a Google sheet
 ###########################################
-def access_sheet(google_file_name, sheet_name):
+def access_sheet(service_account_json, google_file_name, sheet_name):
     '''
     Access the Google's spreadsheet. 
 
@@ -63,11 +81,20 @@ def access_sheet(google_file_name, sheet_name):
     '''
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
-    credentials = service_account.Credentials.from_service_account_info(
-                st.secrets["gcp_service_account"], scopes = scope)
+    credentials = service_account.Credentials.from_service_account_file(service_account_json, scopes = scope)
     gc = gspread.authorize(credentials)
     sheet = gc.open(google_file_name).worksheet(sheet_name)
     return sheet
   
-def save_into_google_sheet(texts, google_sheet_name):
-  
+def save_into_google_sheet(texts):
+  '''
+  Save all pieces of visible texts into the Google sheet.
+
+  Parameters
+  ----------
+  texts : List of str
+    List of pieces of texts extracted from the urls.
+  '''
+  sheet = access_sheet('info')
+  for tt, text in enumerate(texts):
+      sheet.update_cell(tt+2, 1, text)
