@@ -50,6 +50,10 @@ def parse_return_texts(results):
     soup = BeautifulSoup(html, 'html.parser')
     new_texts = soup.getText("|").split('|')
 
+  texts.extend(new_texts)
+
+  return texts
+
 
 def answer_Y_N(text):
     # Ask the question with the context with GPT3 text-davinci-003
@@ -73,6 +77,3 @@ def answer_Y_N(text):
     answer = response["choices"][0]["text"].strip(" \n")
 
     return answer
-    texts.extend(new_texts)
-
-return texts
