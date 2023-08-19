@@ -16,8 +16,8 @@ import requests
 import openai
 
 # Tokens
-serp_api_token = ####
-openai_api_token = ####
+serp_api_token = 'xxxx'
+openai_api_token = 'xxxx'
 
 # 1. Collect the results from a google search
 #############################################
