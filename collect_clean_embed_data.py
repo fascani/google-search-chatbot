@@ -4,9 +4,8 @@
 In this code,
 1. We collect the results from a google search
 2. We parse the html from each link and return the visible text
-3. We use chatGPT to decide whether to keep each piece of text in reference to the topic
-4. We calculate the embeddings of each piece of text that was kept
-5. We create a csv file of the text and its embedding
+3. We calculate the embeddings of each piece of text
+4. We create a csv file of the text and its embedding
 """
 
 import os
@@ -53,6 +52,32 @@ def parse_return_texts(results):
   texts.extend(new_texts)
 
   return texts
+
+# 3. We calculate the embeddings of each piece of text
+#######################################################
+def get_embeddings(text):
+    '''
+    Calculate embeddings.
+
+    Parameters
+    ----------
+    text : str
+        Text to calculate the embeddings for.
+
+    Returns
+    -------
+        List of the embeddings
+    '''
+
+    model = 'text-embedding-ada-002'
+    result = openai.Embedding.create(
+      model=model,
+      input=text
+    )
+    embedding = result["data"][0]["embedding"]
+    
+    return embedding
+
 
 
 def answer_Y_N(text):
