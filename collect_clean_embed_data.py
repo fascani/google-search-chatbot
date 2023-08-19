@@ -4,8 +4,7 @@
 In this code,
 1. We collect the results from a google search
 2. We parse the html from each link and return the visible text
-3. We calculate the embeddings of each piece of text
-4. We create a csv file of the text and its embedding
+3. We save the result into a Google sheet
 """
 
 import os
@@ -13,6 +12,7 @@ from serpapi import GoogleSearch
 from bs4 import BeautifulSoup
 import requests
 import openai
+from google.oauth2 import service_account
 
 # Tokens
 serp_api_token = 'xxxx'
@@ -53,52 +53,21 @@ def parse_return_texts(results):
 
   return texts
 
-# 3. We calculate the embeddings of each piece of text
-#######################################################
-def get_embeddings(text):
+# 3. We save the result into a Google sheet
+###########################################
+def access_sheet(google_file_name, sheet_name):
     '''
-    Calculate embeddings.
+    Access the Google's spreadsheet. 
 
-    Parameters
-    ----------
-    text : str
-        Text to calculate the embeddings for.
-
-    Returns
-    -------
-        List of the embeddings
+    See https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
     '''
-
-    model = 'text-embedding-ada-002'
-    result = openai.Embedding.create(
-      model=model,
-      input=text
-    )
-    embedding = result["data"][0]["embedding"]
-    
-    return embedding
-
-
-
-def answer_Y_N(text):
-    # Ask the question with the context with GPT3 text-davinci-003
-    COMPLETIONS_MODEL = "text-davinci-003"
-
-    prompt = """
-    Does this piece of text is about a review: "<text>".
-    Answer only Y or N.
-    """.replace('<text>', text)
-    
-    response = openai.Completion.create(
-        prompt=prompt,
-        temperature=0,
-        max_tokens=1580,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-        model=COMPLETIONS_MODEL
-    )
-
-    answer = response["choices"][0]["text"].strip(" \n")
-
-    return answer
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive']
+    credentials = service_account.Credentials.from_service_account_info(
+                st.secrets["gcp_service_account"], scopes = scope)
+    gc = gspread.authorize(credentials)
+    sheet = gc.open(google_file_name).worksheet(sheet_name)
+    return sheet
+  
+def save_into_google_sheet(texts, google_sheet_name):
+  
