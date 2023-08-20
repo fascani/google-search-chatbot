@@ -15,6 +15,7 @@ import requests
 from google.oauth2 import service_account
 import gspread
 import nltk
+import numpy
 
 # 1. Collect the results from a google search
 #############################################
@@ -34,16 +35,25 @@ def collect_links(google_search, serp_api_token, num):
   -------
       List of URLs (str).
   '''
-  
-  params = {
-      "engine": "google",
-      "q": google_search,
-      "api_key": serp_api_token,
-      "num": num,
-  }
-  
-  search = GoogleSearch(params)
-  results = search.get_dict()
+  results = dict()
+  start = 0
+  KeepGoing = True
+
+  while KeepGoing:
+    params = {
+        "engine": "google",
+        "q": google_search,
+        "api_key": serp_api_token,
+        "start": start,
+        "num": np.min(10, num-start),
+    }
+    
+    search = GoogleSearch(params)
+    results.update(search.get_dict())
+    if len(results) > num:
+      KeepGoing = False
+    else:
+      start += 10
   
   return results
 
