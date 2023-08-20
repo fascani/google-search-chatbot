@@ -175,5 +175,5 @@ def save_into_google_sheet(df, sheet):
   '''
   for i in range(len(df)):
       sheet.update_cell(i+2, 1, df.loc[i, 'text'])
-      sheet.update_cell(i+2, 3, df.loc[i, 'num_tokens'])
-      sheet.update_cell(i+2, 3, df.loc[i, 'embeddings'])
+      sheet.update_cell(i+2, 3, str(df.loc[i, 'num_tokens']))
+      sheet.update_cell(i+2, 3, str(df.loc[i, 'embeddings']))
