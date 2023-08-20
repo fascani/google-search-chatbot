@@ -174,7 +174,7 @@ def umap_hbdscan_assign_clusters(df, target='embeddings', umap_metric='cosine',
 
   Returns
   -------
-  posts_df : Pandas dataframe
+  df : Pandas dataframe
       Local database with the added column 'cluster' that indicates the cluster
       of each post.
 
@@ -183,7 +183,7 @@ def umap_hbdscan_assign_clusters(df, target='embeddings', umap_metric='cosine',
   umap_embeddings = (umap.UMAP(n_neighbors=n_neighbors, 
                               n_components=n_components, 
                               metric=umap_metric)
-                          .fit_transform(posts_df[target].tolist()))
+                          .fit_transform(df[target].tolist()))
   
   cluster = hdbscan.HDBSCAN(min_cluster_size=n_neighbors,
                         metric='euclidean',                      
