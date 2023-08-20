@@ -85,7 +85,7 @@ def clean_texts(texts, min_num_tokens):
       if len(nltk_tokens)>=min_num_tokens:
           kept_texts.append(cleaned_text)
 
-return kept_texts
+  return kept_texts
 
 # 4. We save the result into a Google sheet
 ###########################################
