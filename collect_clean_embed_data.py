@@ -15,7 +15,7 @@ import requests
 from google.oauth2 import service_account
 import gspread
 import nltk
-import numpy
+import numpy as np
 
 # 1. Collect the results from a google search
 #############################################
