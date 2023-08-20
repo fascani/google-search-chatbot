@@ -13,7 +13,7 @@ from serpapi import GoogleSearch
 from bs4 import BeautifulSoup
 import requests
 from google.oauth2 import service_account
-import spread
+import gspread
 import nltk
 
 # 1. Collect the results from a google search
