@@ -39,6 +39,7 @@ def collect_links(google_search, serp_api_token, num):
       "engine": "google",
       "q": google_search,
       "api_key": serp_api_token,
+      "num": num,
   }
   
   search = GoogleSearch(params)
