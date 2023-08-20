@@ -164,7 +164,7 @@ def access_sheet(service_account_json, google_file_name, sheet_name):
   sheet = gc.open(google_file_name).worksheet(sheet_name)
   return sheet
   
-def save_into_google_sheet(df, sheet):
+def save_into_google_sheet(df, sheet, start):
   '''
   Save all pieces of visible texts and their embeddings into the Google sheet.
 
@@ -172,8 +172,10 @@ def save_into_google_sheet(df, sheet):
   ----------
   df : Pandas df
     Pandas df containing the suite of texts and their embeddings.
+  start: int
+    Row number we start to fill up the sheet
   '''
   for i in range(len(df)):
-      sheet.update_cell(i+2, 1, df.loc[i, 'text'])
-      sheet.update_cell(i+2, 2, str(df.loc[i, 'num_tokens']))
-      sheet.update_cell(i+2, 3, str(df.loc[i, 'embeddings']))
+      sheet.update_cell(start+i+2, 1, df.loc[i, 'text'])
+      sheet.update_cell(start+i+2, 2, str(df.loc[i, 'num_tokens']))
+      sheet.update_cell(start+i+2, 3, str(df.loc[i, 'embeddings']))
