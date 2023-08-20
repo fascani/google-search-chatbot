@@ -6,7 +6,8 @@ In this code,
 2. We parse the html from each link and return the visible text
 3. We clean up the text and return only those with a minimum number of tokens
 4. Calculate embeddings and organize results into a Pandas df
-5. We save the result into a Google sheet
+5. Clusters the different pieces of text
+6. We save the result into a Google sheet
 """
 
 import os
@@ -20,6 +21,8 @@ import numpy as np
 import openai
 import pandas as pd
 from transformers import GPT2TokenizerFast
+import umap
+import hdbscan
 
 # 1. Collect the results from a google search
 #############################################
@@ -149,7 +152,49 @@ def build_df_with_embeddings(texts):
 
   return df
 
-# 5. We save the results into a Google sheet
+# 5. Clusters the different pieces of texts
+############################################
+def umap_hbdscan_assign_clusters(df, target='embeddings', umap_metric='cosine',
+                                 n_neighbors=7, n_components=5):
+  '''
+  Cluster posts using the UMAP+HDBSCAN approach.
+
+  Parameters
+  ----------
+  df : Pandas dataframe
+      Local database.
+  target : str, optional
+      Column containing the embeddings we want to cluster. The default is 'embeddings'.
+  umap_metric : str, optional
+      UMAP metric. The default is 'cosine'.
+  n_neighbors : int, optional
+      Number of neighbors. The default is 7.
+  n_components : int, optional
+      Number of components. The default is 5.
+
+  Returns
+  -------
+  posts_df : Pandas dataframe
+      Local database with the added column 'cluster' that indicates the cluster
+      of each post.
+
+  '''
+  
+  umap_embeddings = (umap.UMAP(n_neighbors=n_neighbors, 
+                              n_components=n_components, 
+                              metric=umap_metric)
+                          .fit_transform(posts_df[target].tolist()))
+  
+  cluster = hdbscan.HDBSCAN(min_cluster_size=n_neighbors,
+                        metric='euclidean',                      
+                        cluster_selection_method='eom').fit(umap_embeddings)
+  labels = cluster.labels_
+  df['cluster'] = labels
+  df['outlier'] = [True if x==-1 else True for x in labels]
+  
+  return df
+
+# 6. We save the results into a Google sheet
 ############################################
 def access_sheet(service_account_json, google_file_name, sheet_name):
   '''
@@ -176,6 +221,8 @@ def save_into_google_sheet(df, sheet, start):
     Row number we start to fill up the sheet
   '''
   for i in range(len(df)):
-      sheet.update_cell(start+i+2, 1, df.loc[i, 'text'])
-      sheet.update_cell(start+i+2, 2, str(df.loc[i, 'num_tokens']))
-      sheet.update_cell(start+i+2, 3, str(df.loc[i, 'embeddings']))
+    sheet.update_cell(start+i+2, 1, df.loc[i, 'text'])
+    sheet.update_cell(start+i+2, 2, str(df.loc[i, 'num_tokens']))
+    sheet.update_cell(start+i+2, 3, str(df.loc[i, 'embeddings']))
+    sheet.update_cell(start+i+2, 4, str(df.loc[i, 'cluster']))
+    sheet.update_cell(start+i+2, 5, str(df.loc[i, 'outlier']))
