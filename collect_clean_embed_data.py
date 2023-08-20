@@ -19,7 +19,7 @@ import numpy as np
 
 # 1. Collect the results from a google search
 #############################################
-def collect_links(google_search, serp_api_token, num):
+def collect_links(google_search, serp_api_token, start):
   '''
   Collect links from a google search
 
@@ -29,32 +29,25 @@ def collect_links(google_search, serp_api_token, num):
       Google search string
   serp_api_token : str
       API token for SerpApi. See https://serpapi.com/
-  num: int
-      Number of links to return
+  start: int
+      Return outputs after the (start)th
   Returns
   -------
       List of URLs (str).
   '''
   results = dict()
-  start = 0
-  KeepGoing = True
-
-  while KeepGoing:
-    params = {
-        "engine": "google",
-        "q": google_search,
-        "api_key": serp_api_token,
-        "start": start,
-        "num": np.min([10, num-start]),
-    }
-    
-    search = GoogleSearch(params)
-    results.update(search.get_dict())
-    if len(results) > num:
-      KeepGoing = False
-    else:
-      start += 10
   
+  params = {
+      "engine": "google",
+      "q": google_search,
+      "api_key": serp_api_token,
+      "start": start,
+      "num": 10,
+  }
+    
+  search = GoogleSearch(params)
+  results.update(search.get_dict())
+   
   return results
 
 # 2. We parse the html from each link and return the visible text
