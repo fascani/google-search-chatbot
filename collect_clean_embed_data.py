@@ -5,7 +5,8 @@ In this code,
 1. We collect the results from a google search
 2. We parse the html from each link and return the visible text
 3. We clean up the text and return only those with a minimum number of tokens
-4. We save the result into a Google sheet
+4. Calculate embeddings and organize results into a Pandas df
+5. We save the result into a Google sheet
 """
 
 import os
@@ -16,6 +17,9 @@ from google.oauth2 import service_account
 import gspread
 import nltk
 import numpy as np
+import openai
+import pandas as pd
+from transformers import GPT2TokenizerFast
 
 # 1. Collect the results from a google search
 #############################################
@@ -78,8 +82,8 @@ def parse_return_texts(results):
 
   return texts
 
-# 3. We save the result into a Google sheet
-###########################################
+# 3. We clean up the text and return only those with a minimum number of tokens
+###############################################################################
 def clean_texts(texts, min_num_tokens):
   kept_texts = []
   for text in texts:
@@ -91,8 +95,62 @@ def clean_texts(texts, min_num_tokens):
 
   return kept_texts
 
-# 4. We save the result into a Google sheet
-###########################################
+# 4. Calculate embeddings, number of tokens, and organize results into a Pandas df
+##################################################################################
+def load_tokenizer():
+  return GPT2TokenizerFast.from_pretrained("gpt2")
+  
+def get_embeddings(text):
+    '''
+    Calculate embeddings.
+
+    Parameters
+    ----------
+    text : str
+        Text to calculate the embeddings for.
+    Returns
+    -------
+        List of the embeddings
+    '''
+
+    
+    model = 'text-embedding-ada-002'
+    result = openai.Embedding.create(
+      model=model,
+      input=text
+    )
+    embedding = result["data"][0]["embedding"]
+    
+    return embedding
+
+def build_df_with_embeddings(texts):
+  '''
+  Calculate embeddings.
+
+  Parameters
+  ----------
+  texts : list of str
+      List of pieces text
+      
+  Returns
+  -------
+      Pandas df with original text, number of tokens and their embeddings
+  '''
+
+  embeddings = []
+  tokenizer = load_tokenizer()
+  num_tokens = []
+  
+  for text in texts:
+    embeddings.append(get_embeddings(text))
+    num_tokens.append(len(tokenizer.encode(text)))
+    
+  df = pd.DataFrame({'text': texts, 'num_tokens': num_tokens, 'embeddings': embeddings})
+
+return df
+
+# 5. We save the results into a Google sheet
+############################################
 def access_sheet(service_account_json, google_file_name, sheet_name):
     '''
     Access the Google's spreadsheet. 
@@ -106,14 +164,16 @@ def access_sheet(service_account_json, google_file_name, sheet_name):
     sheet = gc.open(google_file_name).worksheet(sheet_name)
     return sheet
   
-def save_into_google_sheet(texts, sheet):
+def save_into_google_sheet(df, sheet):
   '''
-  Save all pieces of visible texts into the Google sheet.
+  Save all pieces of visible texts and their embeddings into the Google sheet.
 
   Parameters
   ----------
-  texts : List of str
-    List of pieces of texts extracted from the urls.
+  df : Pandas df
+    Pandas df containing the suite of texts and their embeddings.
   '''
-  for tt, text in enumerate(texts):
-      sheet.update_cell(tt+2, 1, text)
+  for i in range(len(df)):
+      sheet.update_cell(i+2, 1, df.loc[i, 'text'])
+      sheet.update_cell(i+2, 3, df.loc[i, 'num_tokens'])
+      sheet.update_cell(i+2, 3, df.loc[i, 'embeddings'])
