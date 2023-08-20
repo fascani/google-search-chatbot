@@ -101,27 +101,27 @@ def load_tokenizer():
   return GPT2TokenizerFast.from_pretrained("gpt2")
   
 def get_embeddings(text):
-    '''
-    Calculate embeddings.
+  '''
+  Calculate embeddings.
 
-    Parameters
-    ----------
-    text : str
-        Text to calculate the embeddings for.
-    Returns
-    -------
-        List of the embeddings
-    '''
+  Parameters
+  ----------
+  text : str
+      Text to calculate the embeddings for.
+  Returns
+  -------
+      List of the embeddings
+  '''
 
-    
-    model = 'text-embedding-ada-002'
-    result = openai.Embedding.create(
-      model=model,
-      input=text
-    )
-    embedding = result["data"][0]["embedding"]
-    
-    return embedding
+  
+  model = 'text-embedding-ada-002'
+  result = openai.Embedding.create(
+    model=model,
+    input=text
+  )
+  embedding = result["data"][0]["embedding"]
+  
+  return embedding
 
 def build_df_with_embeddings(texts):
   '''
@@ -147,22 +147,22 @@ def build_df_with_embeddings(texts):
     
   df = pd.DataFrame({'text': texts, 'num_tokens': num_tokens, 'embeddings': embeddings})
 
-return df
+  return df
 
 # 5. We save the results into a Google sheet
 ############################################
 def access_sheet(service_account_json, google_file_name, sheet_name):
-    '''
-    Access the Google's spreadsheet. 
+  '''
+  Access the Google's spreadsheet. 
 
-    See https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
-    '''
-    scope = ['https://spreadsheets.google.com/feeds',
-             'https://www.googleapis.com/auth/drive']
-    credentials = service_account.Credentials.from_service_account_file(service_account_json, scopes = scope)
-    gc = gspread.authorize(credentials)
-    sheet = gc.open(google_file_name).worksheet(sheet_name)
-    return sheet
+  See https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
+  '''
+  scope = ['https://spreadsheets.google.com/feeds',
+           'https://www.googleapis.com/auth/drive']
+  credentials = service_account.Credentials.from_service_account_file(service_account_json, scopes = scope)
+  gc = gspread.authorize(credentials)
+  sheet = gc.open(google_file_name).worksheet(sheet_name)
+  return sheet
   
 def save_into_google_sheet(df, sheet):
   '''
