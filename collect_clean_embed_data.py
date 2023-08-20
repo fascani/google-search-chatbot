@@ -86,7 +86,7 @@ def access_sheet(service_account_json, google_file_name, sheet_name):
     sheet = gc.open(google_file_name).worksheet(sheet_name)
     return sheet
   
-def save_into_google_sheet(texts):
+def save_into_google_sheet(texts, sheet):
   '''
   Save all pieces of visible texts into the Google sheet.
 
@@ -95,6 +95,5 @@ def save_into_google_sheet(texts):
   texts : List of str
     List of pieces of texts extracted from the urls.
   '''
-  sheet = access_sheet('info')
   for tt, text in enumerate(texts):
       sheet.update_cell(tt+2, 1, text)
