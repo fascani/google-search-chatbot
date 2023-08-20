@@ -45,7 +45,7 @@ def collect_links(google_search, serp_api_token, num):
         "q": google_search,
         "api_key": serp_api_token,
         "start": start,
-        "num": np.min(10, num-start),
+        "num": np.min([10, num-start]),
     }
     
     search = GoogleSearch(params)
