@@ -1,0 +1,7 @@
+gspread
+streamlit
+oauth2client
+openai
+transformers
+sentence_transformers
+streamlit_chat
