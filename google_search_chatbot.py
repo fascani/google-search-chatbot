@@ -336,7 +336,7 @@ if check_password():
 
     # Get the answer
     if user_input:
-        answer, prompt = ama_chatbot(user_input, df)
+        answer, prompt = google_search_chatbot(user_input, df)
         # Store the output 
         st.session_state.past.append(user_input)
         st.session_state.generated.append(answer)
