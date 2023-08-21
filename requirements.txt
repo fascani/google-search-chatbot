@@ -1,6 +1,7 @@
 gspread
 streamlit
 oauth2client
+google-auth
 openai
 transformers
 sentence_transformers
